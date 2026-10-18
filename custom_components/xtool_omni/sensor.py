@@ -176,7 +176,7 @@ SENSORS: tuple[OmniSensorDescription, ...] = (
 async def async_setup_entry(hass: HomeAssistant, entry: OmniConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     coord = entry.runtime_data
     entities: list[SensorEntity] = [OmniSensor(coord, desc) for desc in SENSORS]
-    known_tanks: set[int] = set()
+    known_tanks: set[str] = set()
     known_moist: set[int] = set()
     known_heads: set[int] = set()
 
@@ -228,13 +228,21 @@ class OmniInkTankSensor(OmniEntity, SensorEntity):
     _attr_suggested_display_precision = 1
     _attr_icon = "mdi:water"
 
-    def __init__(self, coordinator: OmniCoordinator, pos: int) -> None:
-        super().__init__(coordinator, f"ink_tank_{pos}")
-        self._pos = pos
-        self._attr_name = self._tank().get("name") or f"Ink tank {pos}"
+    _attr_suggested_unit_of_measurement = UnitOfVolume.MILLILITERS
+
+    def __init__(self, coordinator: OmniCoordinator, key: str) -> None:
+        super().__init__(coordinator, f"ink_tank_{key}")
+        self._tank_key = key
+        t = self._tank()
+        name = t.get("name") or f"Ink tank {key}"
+        # two tanks can share a name (e.g. two DTG White); add the slot to the second
+        same = [k for k, v in (coordinator.data.get("ink_tanks") or {}).items() if v.get("name") == name]
+        if len(same) > 1 and same.index(key) > 0:
+            name = f"{name} {same.index(key) + 1}"
+        self._attr_name = name
 
     def _tank(self) -> dict:
-        return (self.coordinator.data.get("ink_tanks") or {}).get(self._pos, {})
+        return (self.coordinator.data.get("ink_tanks") or {}).get(self._tank_key, {})
 
     @property
     def native_value(self) -> float | None:
@@ -252,6 +260,8 @@ class OmniInkTankSensor(OmniEntity, SensorEntity):
             "level_value": t.get("level_value"),
             "serial": t.get("serial"),
             "installed": t.get("exist"),
+            "ink_line": {1: "UV", 2: "DTG"}.get(t.get("road"), t.get("road")),
+            "slot": t.get("slot"),
         }
 
 
@@ -262,6 +272,7 @@ class OmniMoisturizingSensor(OmniEntity, SensorEntity):
     _attr_suggested_display_precision = 1
     _attr_icon = "mdi:water-opacity"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_suggested_unit_of_measurement = UnitOfVolume.MILLILITERS
 
     def __init__(self, coordinator: OmniCoordinator, idx: int) -> None:
         super().__init__(coordinator, f"moisturizing_{idx}")

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 from datetime import timedelta
 from typing import Any
 
@@ -221,24 +222,34 @@ class OmniCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         d["pallet"] = p.get("pallet")
 
     def _apply_ink(self, ink: dict) -> None:
-        tanks: dict[int, dict] = {}
+        """Ink tanks arrive grouped by ink line ("inkRoad1" = UV, "inkRoad2" = DTG, ...).
+        Key each tank by (road, slot) so both lines are kept."""
+        tanks: dict[str, dict] = dict(self.data.get("ink_tanks") or {})
         for road, lst in ink.items():
             if not isinstance(lst, list):
                 continue
+            road_no = int(re.sub(r"\D", "", road) or 1)
             for i, t in enumerate(lst):
-                tid = int(t.get("tank_id", i))
-                pos = i + 1  # device uses 1-based in /ink-tank and 0-based in /device/info
-                prev = self.data["ink_tanks"].get(pos, {})
-                tanks[pos] = {
-                    "name": t.get("name") or prev.get("name") or INK_TANK_FALLBACK_NAMES.get(pos, f"Tank {pos}"),
+                if not isinstance(t, dict):
+                    continue
+                slot = i + 1
+                key = f"{road_no}_{slot}"
+                prev = tanks.get(key, {})
+                name = t.get("name") or prev.get("name")
+                if not name:
+                    line = {1: "UV", 2: "DTG"}.get(road_no, f"Line {road_no}")
+                    name = f"{line} {INK_TANK_FALLBACK_NAMES.get(slot, f'tank {slot}')}"
+                tanks[key] = {
+                    "name": name,
                     "remain_ml": t.get("remain_ml"),
                     "full_ml": t.get("full_ml"),
                     "level": t.get("level"),
                     "level_value": t.get("level_value"),
                     "serial": t.get("serial"),
                     "exist": t.get("exist"),
-                    "road": road,
-                    "tank_id": tid,
+                    "road": road_no,
+                    "slot": slot,
+                    "tank_id": t.get("tank_id"),
                 }
         if tanks:
             self.data["ink_tanks"] = tanks

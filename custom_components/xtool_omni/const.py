@@ -58,10 +58,10 @@ CONFIG_KEYS = [
 
 # Ink tank names by position, as the device reports them in /v1/project/device/info
 INK_TANK_FALLBACK_NAMES = {
-    1: "UV Cyan",
-    2: "UV Magenta",
-    3: "UV Yellow",
-    4: "UV Black",
-    5: "UV Varnish",
-    6: "UV White",
+    1: "Cyan",
+    2: "Magenta",
+    3: "Yellow",
+    4: "Black",
+    5: "Varnish",
+    6: "White",
 }
