@@ -1,0 +1,13 @@
+{
+  "domain": "xtool_omni",
+  "name": "xTool O1 Omni",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/cassmiecz/ha-xtool-omni",
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/cassmiecz/ha-xtool-omni/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

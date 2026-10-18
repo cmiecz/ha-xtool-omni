@@ -1,0 +1,49 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to your xTool O1 Omni",
+        "description": "Enter the Omni's IP address on your local network (shown in xTool Studio or your router). The connection is local only — no xTool account needed.",
+        "data": {
+          "host": "IP address",
+          "port": "Port"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not reach the Omni on port 28900. Check the IP and that it is powered on.",
+      "invalid_auth": "The Omni rejected the guest login (firmware may have changed).",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "already_configured": "This Omni is already set up."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "mode": { "name": "Status" },
+      "wifi_rssi": { "name": "Wi-Fi signal" },
+      "job_name": { "name": "Job" },
+      "job_progress": { "name": "Job progress" },
+      "last_job_finished": { "name": "Last job finished" },
+      "waste_tank": { "name": "Waste tank level" },
+      "uv_lamp_hours": { "name": "UV lamp run time" },
+      "air_purifier_hours": { "name": "Air purifier run time" },
+      "print_count": { "name": "Total prints" },
+      "print_hours": { "name": "Total print time" }
+    },
+    "binary_sensor": {
+      "online": { "name": "Online" },
+      "lid": { "name": "Lid" },
+      "door_1": { "name": "Door 1" },
+      "door_2": { "name": "Door 2" },
+      "filter": { "name": "Filter installed" },
+      "running": { "name": "Running" },
+      "problem": { "name": "Alarm" }
+    },
+    "button": {
+      "home": { "name": "Home all axes" },
+      "refresh": { "name": "Refresh" }
+    }
+  }
+}
